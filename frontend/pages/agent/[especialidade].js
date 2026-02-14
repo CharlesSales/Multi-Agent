@@ -9,7 +9,7 @@ export default function AgentPage() {
   const router = useRouter()
   const { especialidade } = router.query
   const [agentes, setAgentes] = useState([]);
-  const backend = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+  const backend = process.env.NEXT_PUBLIC_RENDER_URL  || 'http://localhost:3000';
   
   useEffect(() => {
     async function fetchAgents() {

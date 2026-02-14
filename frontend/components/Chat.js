@@ -6,7 +6,7 @@ export default function ChatMessenger({ especialidade = '4'}) {
   const [messages, setMessages] = useState([]);
   const [isThinking, setIsThinking] = useState(false);
   const messagesEndRef = useRef(null);
-  const backend = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+  const backend = process.env.NEXT_PUBLIC_RENDER_URL || 'http://localhost:3000';
   const [botName, setBotName] = useState('Agente');
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function ChatMessenger({ especialidade = '4'}) {
     async function fetchAgents() {
       try {
         const res = await fetch(`${backend}/api/agente`);
-        const data = await res.json();
+        const data = await res.json(); 
 
         const lista =
           Array.isArray(data) ? data :
