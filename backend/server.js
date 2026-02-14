@@ -7,7 +7,7 @@ import cors from 'cors'
 env.config();
 
 const app = express();
-const front = precess.env.FRONTEND
+const front = process.env.FRONTEND
 
 app.use(express.json());
 app.use(cors({
