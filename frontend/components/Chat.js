@@ -25,8 +25,6 @@ export default function ChatMessenger({ especialidade = '4'}) {
           Array.isArray(data.data) ? data.data :
           [];
 
-        setAgentes(lista);
-
         const agenteSelecionado = lista.find(a =>
           String(a.id) === String(especialidade) ||
           a.especialidade?.nome_especialidade === especialidade
@@ -64,7 +62,7 @@ export default function ChatMessenger({ especialidade = '4'}) {
         ...prev,
         {
           role: 'bot',
-          text: res.ok ? data.bot : (data.error || 'Erro'),
+          text: res.ok ? data.bot : (data.error || 'Tivemos um pequeno problema no servidor'),
           time: new Date()
         }
       ]);
