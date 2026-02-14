@@ -7,9 +7,11 @@ import cors from 'cors'
 env.config();
 
 const app = express();
+const front = precess.env.FRONTEND
+
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3001', // seu front-end
+  origin: front, // seu front-end
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true, // se precisar de cookies/autenticação
 }));
