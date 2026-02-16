@@ -8,7 +8,6 @@ export default function ChatMessenger({ especialidade = '3' }) {
   const messagesEndRef = useRef(null);
   const [loadingAgent, setLoadingAgent] = useState(true)
   const backend = process.env.NEXT_PUBLIC_RENDER_URL;
-  const backend_local = 'http://localhost:3000';
   const [botName, setBotName] = useState('Agente');
   const [profissao, setProfissao] = useState()
   const [agenteId, setAgenteId] = useState(null)
@@ -20,7 +19,7 @@ export default function ChatMessenger({ especialidade = '3' }) {
   useEffect(() => {
     async function fetchAgents() {
       try {
-        const res = await fetch(`${backend_local}/api/agente`);
+        const res = await fetch(`${backend}/api/agente`);
         const data = await res.json();
 
         const lista =
@@ -56,7 +55,7 @@ export default function ChatMessenger({ especialidade = '3' }) {
 
 
     fetchAgents();
-  }, [backend_local, especialidade]);
+  }, [backend, especialidade]);
 
 
   async function send() {
@@ -78,7 +77,7 @@ export default function ChatMessenger({ especialidade = '3' }) {
     setIsThinking(true);
 
     try {
-      const res = await fetch(`${backend_local}/api/chat/${agenteId}`, {
+      const res = await fetch(`${backend}/api/chat/${agenteId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -135,13 +134,8 @@ export default function ChatMessenger({ especialidade = '3' }) {
         fontWeight: 'bold',
         fontSize: 16,
       }}>
-        Chat com {botName}
-      </div>
-
-      <div>
         {loadingAgent ? 'Carregando agente...' : `Chat com ${botName}`}
       </div>
-
 
       {/* Messages */}
       <div style={{ flex: 1, padding: 16, overflowY: 'auto', background: '#e5ddd5' }}>
