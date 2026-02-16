@@ -17,22 +17,17 @@ export async function sendMessage(req, res) {
             .eq('especialidade', especialidade)
             .single()
         
+            
+        if (error) {
+            console.error('Supabase error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
         if (!data) {
             return res.status(400).json({
                 message: 'O codigo quebrou'
             })
         }
-
-        if (error) {
-            return res.status(400).json({
-                error: error.message, 
-                message: 'Deu merda'
-
-            })
-        }
-
-
-
 
         Memoria.addMessage(userID, 'user', message);
 

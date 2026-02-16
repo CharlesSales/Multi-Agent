@@ -1,13 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 
-export default function ChatMessenger({ especialidade = '4'}) {
+export default function ChatMessenger({ especialidade = '3' }) {
   const [userID] = useState('user1');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isThinking, setIsThinking] = useState(false);
   const messagesEndRef = useRef(null);
-  const backend = process.env.NEXT_PUBLIC_RENDER_URL || 'http://localhost:3000';
+  const [loadingAgent, setLoadingAgent] = useState(true)
+  const backend = process.env.NEXT_PUBLIC_RENDER_URL;
+  const backend_local = 'http://localhost:3000';
   const [botName, setBotName] = useState('Agente');
+  const [profissao, setProfissao] = useState()
+  const [agenteId, setAgenteId] = useState(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -16,41 +20,65 @@ export default function ChatMessenger({ especialidade = '4'}) {
   useEffect(() => {
     async function fetchAgents() {
       try {
-        const res = await fetch(`${backend}/api/agente`);
-        const data = await res.json(); 
+        const res = await fetch(`${backend_local}/api/agente`);
+        const data = await res.json();
 
         const lista =
           Array.isArray(data) ? data :
-          Array.isArray(data.agentes) ? data.agentes :
-          Array.isArray(data.data) ? data.data :
-          [];
+            Array.isArray(data.agentes) ? data.agentes :
+              Array.isArray(data.data) ? data.data :
+                [];
+
+        console.log('Resposta /api/agente:', data);
+        console.log('Lista normalizada:', lista);
+        console.log('Especialidade recebida:', especialidade);
 
         const agenteSelecionado = lista.find(a =>
           String(a.id) === String(especialidade) ||
-          a.especialidade?.nome_especialidade === especialidade
+          String(a.especialidade?.id) === String(especialidade) ||
+          a.especialidade?.nome_especialidade === especialidade ||
+          a.nome === especialidade   // ✅ CORREÇÃO IMPORTANTE
         );
+
 
         if (agenteSelecionado) {
           setBotName(agenteSelecionado.nome);
+          setProfissao(agenteSelecionado.especialidade);
+          setAgenteId(agenteSelecionado.id);
         }
+
       } catch (err) {
         console.error('Erro ao buscar agentes:', err);
+      } finally {
+        setLoadingAgent(false);
       }
     }
 
+
     fetchAgents();
-  }, [backend, especialidade]);
+  }, [backend_local, especialidade]);
 
 
   async function send() {
     if (!message.trim()) return;
+
+    if (!agenteId) {
+      console.warn('Agente ainda não carregado');
+      return;
+    }
+
     const payload = { userID, message };
-    setMessages(prev => [...prev, { role: 'user', text: message, time: new Date() }]);
+
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', text: message, time: new Date() }
+    ]);
+
     setMessage('');
     setIsThinking(true);
 
     try {
-      const res = await fetch(`${backend}/api/chat/${especialidade}`, {
+      const res = await fetch(`${backend_local}/api/chat/${agenteId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -62,14 +90,10 @@ export default function ChatMessenger({ especialidade = '4'}) {
         ...prev,
         {
           role: 'bot',
-          text: res.ok ? data.bot : (data.error || 'Tivemos um pequeno problema no servidor'),
+          text: res.ok ? data.bot : (data.error || 'Erro no servidor'),
           time: new Date()
         }
       ]);
-
-      if (data.nome) {
-        setBotName(data.nome);
-      }
 
     } catch (e) {
       setMessages(prev => [
@@ -80,6 +104,7 @@ export default function ChatMessenger({ especialidade = '4'}) {
       setIsThinking(false);
     }
   }
+
 
   const formatTime = (date) =>
     date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -112,6 +137,11 @@ export default function ChatMessenger({ especialidade = '4'}) {
       }}>
         Chat com {botName}
       </div>
+
+      <div>
+        {loadingAgent ? 'Carregando agente...' : `Chat com ${botName}`}
+      </div>
+
 
       {/* Messages */}
       <div style={{ flex: 1, padding: 16, overflowY: 'auto', background: '#e5ddd5' }}>
@@ -200,22 +230,23 @@ export default function ChatMessenger({ especialidade = '4'}) {
           }}
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())}
         />
-        <button onClick={send} style={{
-          padding: '0 20px',
-          borderRadius: 20,
-          border: 'none',
-          background: '#0078FF',
-          color: '#fff',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          fontSize: 14,
-          transition: 'background 0.2s',
-        }}
-        onMouseEnter={e => e.currentTarget.style.background = '#005FCC'}
-        onMouseLeave={e => e.currentTarget.style.background = '#0078FF'}
+        <button
+          onClick={send}
+          disabled={!agenteId}
+          style={{
+            padding: '0 20px',
+            borderRadius: 20,
+            border: 'none',
+            background: !agenteId ? '#999' : '#0078FF',
+            color: '#fff',
+            fontWeight: 'bold',
+            cursor: !agenteId ? 'not-allowed' : 'pointer',
+            fontSize: 14,
+          }}
         >
           Enviar
         </button>
+
       </div>
     </div>
   );
