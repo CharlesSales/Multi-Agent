@@ -11,7 +11,7 @@ const front = process.env.FRONTEND
 
 app.use(express.json());
 app.use(cors({
-  origin: front, // seu front-end
+  origin: 'http://localhost:3001', // seu front-end
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true, // se precisar de cookies/autenticação
 }));
