@@ -1,4 +1,3 @@
-import { error } from "node:console";
 import supabase from "../config/supabaseClient.js";
 
 export async function getAgents(req, res) {
@@ -12,10 +11,12 @@ export async function getAgents(req, res) {
                     nome_especialidade
                 ),
                 descricao`)
+            .order('id', {ascending: true})
         
         if (error) {
             res.status(404).json({
-                message: 'erro ao buscar'
+                message: 'erro ao buscar',
+                error: error.message
             })
         }
 

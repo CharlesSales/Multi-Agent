@@ -77,7 +77,7 @@ export default function ChatMessenger({ especialidade = '3' }) {
     setIsThinking(true);
 
     try {
-      const res = await fetch(`${backend}/api/chat/${agenteId}`, {
+      const res = await fetch(`${backend}/api/chat/openRoute/${agenteId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
